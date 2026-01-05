@@ -35,6 +35,7 @@ Route::get('/categories', [CategoryController::class, 'index']);
 
 // Football endpoints (public)
 Route::prefix('football')->group(function () {
+    Route::get('/competitions', [FootballController::class, 'competitions']);
     Route::get('/fixtures', [FootballController::class, 'fixtures']);
     Route::get('/fixtures/next', [FootballController::class, 'nextFixture']);
     Route::get('/results', [FootballController::class, 'results']);

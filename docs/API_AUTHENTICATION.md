@@ -1156,7 +1156,194 @@ Accept: application/json
 
 The Football API provides Arsenal FC match data, fixtures, results, and league standings. Data is fetched from api-football.com and cached locally, with automatic sync every 6 hours.
 
-### 19. Get Upcoming Fixtures
+### 19. Get Competitions
+
+Get all competitions/leagues that Arsenal is currently participating in. Use this endpoint to populate a competition filter dropdown in the frontend.
+
+**Endpoint:** `GET /api/football/competitions`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `season` | integer | No | current | Season year (e.g., 2025) |
+| `include_match_count` | boolean | No | true | Include match count for each competition |
+
+**Request:**
+```http
+GET /api/football/competitions HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "type": "Cup",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "country": {
+        "name": "World",
+        "code": null,
+        "flag": null
+      },
+      "season": {
+        "year": 2025,
+        "start": "2025-09-17",
+        "end": "2026-05-30"
+      },
+      "match_count": 6
+    },
+    {
+      "id": 39,
+      "name": "Premier League",
+      "type": "League",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "country": {
+        "name": "England",
+        "code": "GB",
+        "flag": "https://media.api-sports.io/flags/gb.svg"
+      },
+      "season": {
+        "year": 2025,
+        "start": "2025-08-16",
+        "end": "2026-05-24"
+      },
+      "match_count": 20
+    },
+    {
+      "id": 45,
+      "name": "FA Cup",
+      "type": "Cup",
+      "logo": "https://media.api-sports.io/football/leagues/45.png",
+      "country": {
+        "name": "England",
+        "code": "GB",
+        "flag": "https://media.api-sports.io/flags/gb.svg"
+      },
+      "season": {
+        "year": 2025,
+        "start": "2025-11-01",
+        "end": "2026-05-17"
+      },
+      "match_count": 3
+    },
+    {
+      "id": 48,
+      "name": "League Cup",
+      "type": "Cup",
+      "logo": "https://media.api-sports.io/football/leagues/48.png",
+      "country": {
+        "name": "England",
+        "code": "GB",
+        "flag": "https://media.api-sports.io/flags/gb.svg"
+      },
+      "season": {
+        "year": 2025,
+        "start": "2025-08-12",
+        "end": "2026-03-01"
+      },
+      "match_count": 2
+    }
+  ],
+  "meta": {
+    "total": 4,
+    "season": 2025
+  }
+}
+```
+
+**Competition Object Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | integer | League/competition ID (use for filtering results) |
+| `name` | string | Competition name |
+| `type` | string | `League` or `Cup` |
+| `logo` | string | Competition logo URL |
+| `country.name` | string | Country name |
+| `country.code` | string\|null | Country code (e.g., "GB") |
+| `country.flag` | string\|null | Country flag URL |
+| `season.year` | integer | Season year |
+| `season.start` | string | Season start date |
+| `season.end` | string | Season end date |
+| `match_count` | integer | Number of matches played in this competition |
+
+**Frontend Usage - Competition Filter:**
+
+```typescript
+// TypeScript interface
+interface Competition {
+  id: number;
+  name: string;
+  type: string;
+  logo: string;
+  country: {
+    name: string;
+    code: string | null;
+    flag: string | null;
+  };
+  season: {
+    year: number;
+    start: string;
+    end: string;
+  };
+  match_count: number;
+}
+
+// React component example
+const CompetitionFilter = () => {
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [selected, setSelected] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/football/competitions')
+      .then(res => res.json())
+      .then(data => setCompetitions(data.data));
+  }, []);
+
+  const handleFilter = (leagueId: number | null) => {
+    setSelected(leagueId);
+    // Fetch results filtered by competition
+    const url = leagueId
+      ? `http://localhost:8000/api/football/results?league_id=${leagueId}`
+      : 'http://localhost:8000/api/football/results';
+    // ... fetch and update results
+  };
+
+  return (
+    <div className="competition-filter">
+      <button
+        className={selected === null ? 'active' : ''}
+        onClick={() => handleFilter(null)}
+      >
+        All Competitions
+      </button>
+      {competitions.map(comp => (
+        <button
+          key={comp.id}
+          className={selected === comp.id ? 'active' : ''}
+          onClick={() => handleFilter(comp.id)}
+        >
+          <img src={comp.logo} alt={comp.name} width="20" />
+          {comp.name} ({comp.match_count})
+        </button>
+      ))}
+    </div>
+  );
+};
+```
+
+---
+
+### 20. Get Upcoming Fixtures
 
 Get Arsenal's upcoming matches.
 
@@ -1229,7 +1416,7 @@ Accept: application/json
 
 ---
 
-### 20. Get Next Fixture
+### 21. Get Next Fixture
 
 Get Arsenal's next upcoming match.
 
@@ -1297,7 +1484,7 @@ Accept: application/json
 
 ---
 
-### 21. Get Match Results
+### 22. Get Match Results
 
 Get Arsenal's match results.
 
@@ -1380,7 +1567,7 @@ Accept: application/json
 
 ---
 
-### 22. Get Last Match Result
+### 23. Get Last Match Result
 
 Get Arsenal's most recent match result.
 
@@ -1457,7 +1644,7 @@ Accept: application/json
 
 ---
 
-### 23. Get Match Report
+### 24. Get Match Report
 
 Get detailed match report including events (goals, cards, substitutions), lineups (formations, starting XI, substitutes), and match statistics (possession, shots, passes, etc.).
 
@@ -2121,7 +2308,7 @@ export default function MatchReportPage({ params }: { params: { fixtureId: strin
 
 ---
 
-### 24. Get League Standings
+### 25. Get League Standings
 
 Get league table/standings.
 
@@ -2269,7 +2456,7 @@ Accept: application/json
 
 ---
 
-### 25. Get Arsenal Season Statistics
+### 26. Get Arsenal Season Statistics
 
 Get Arsenal's season statistics summary.
 

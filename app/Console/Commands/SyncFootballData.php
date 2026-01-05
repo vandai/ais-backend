@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Competition;
 use App\Models\Fixture;
 use App\Models\LeagueTable;
 use App\Models\MatchResult;
@@ -21,6 +22,7 @@ class SyncFootballData extends Command
                             {--results : Sync only match results}
                             {--standings : Sync only league standings}
                             {--details : Sync match details for last 20 matches}
+                            {--competitions : Sync only competitions}
                             {--season= : Specific season to sync (default: current)}';
 
     /**
@@ -46,9 +48,13 @@ class SyncFootballData extends Command
         $this->info('Starting football data sync...');
 
         $season = $this->option('season') ?? $this->footballApi->getCurrentSeason();
-        $syncAll = !$this->option('fixtures') && !$this->option('results') && !$this->option('standings') && !$this->option('details');
+        $syncAll = !$this->option('fixtures') && !$this->option('results') && !$this->option('standings') && !$this->option('details') && !$this->option('competitions');
 
         try {
+            if ($syncAll || $this->option('competitions')) {
+                $this->syncCompetitions($season);
+            }
+
             if ($syncAll || $this->option('fixtures')) {
                 $this->syncFixtures();
             }
@@ -344,5 +350,60 @@ class SyncFootballData extends Command
         }
 
         $this->info("Synced details for {$count} matches");
+    }
+
+    /**
+     * Sync competitions for the team.
+     */
+    protected function syncCompetitions(int $season): void
+    {
+        $this->info("Syncing competitions for season {$season}...");
+
+        $competitions = $this->footballApi->getTeamCompetitions($season);
+
+        if (empty($competitions)) {
+            $this->warn('No competitions data received from API');
+            return;
+        }
+
+        // Mark all existing competitions as not current
+        Competition::where('season', $season)->update(['is_current' => false]);
+
+        $count = 0;
+        foreach ($competitions as $competitionData) {
+            $this->upsertCompetition($competitionData, $season);
+            $count++;
+        }
+
+        $this->info("Synced {$count} competitions");
+    }
+
+    /**
+     * Upsert competition record.
+     */
+    protected function upsertCompetition(array $data, int $season): void
+    {
+        $league = $data['league'] ?? [];
+        $country = $data['country'] ?? [];
+        $seasons = $data['seasons'] ?? [];
+
+        // Find current season data
+        $currentSeason = collect($seasons)->firstWhere('current', true) ?? [];
+
+        Competition::updateOrCreate(
+            ['league_id' => $league['id']],
+            [
+                'name' => $league['name'] ?? '',
+                'type' => $league['type'] ?? null,
+                'logo' => $league['logo'] ?? null,
+                'country' => $country['name'] ?? null,
+                'country_code' => $country['code'] ?? null,
+                'country_flag' => $country['flag'] ?? null,
+                'season' => $currentSeason['year'] ?? $season,
+                'season_start' => $currentSeason['start'] ?? null,
+                'season_end' => $currentSeason['end'] ?? null,
+                'is_current' => true,
+            ]
+        );
     }
 }

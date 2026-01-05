@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Competition;
 use App\Models\Fixture;
 use App\Models\LeagueTable;
 use App\Models\MatchResult;
@@ -17,6 +18,63 @@ class FootballController extends Controller
     public function __construct(FootballApiService $footballApi)
     {
         $this->footballApi = $footballApi;
+    }
+
+    /**
+     * Get all competitions Arsenal is participating in.
+     */
+    public function competitions(Request $request): JsonResponse
+    {
+        $season = $request->input('season', $this->footballApi->getCurrentSeason());
+        $includeMatchCount = $request->boolean('include_match_count', true);
+
+        $competitions = Competition::current()
+            ->season($season)
+            ->orderBy('name')
+            ->get();
+
+        // If no competitions in database, try to fetch from API
+        if ($competitions->isEmpty()) {
+            $apiCompetitions = $this->footballApi->getTeamCompetitions($season);
+
+            if ($apiCompetitions) {
+                foreach ($apiCompetitions as $data) {
+                    $league = $data['league'] ?? [];
+                    $country = $data['country'] ?? [];
+                    $seasons = $data['seasons'] ?? [];
+                    $currentSeason = collect($seasons)->firstWhere('current', true) ?? [];
+
+                    Competition::updateOrCreate(
+                        ['league_id' => $league['id']],
+                        [
+                            'name' => $league['name'] ?? '',
+                            'type' => $league['type'] ?? null,
+                            'logo' => $league['logo'] ?? null,
+                            'country' => $country['name'] ?? null,
+                            'country_code' => $country['code'] ?? null,
+                            'country_flag' => $country['flag'] ?? null,
+                            'season' => $currentSeason['year'] ?? $season,
+                            'season_start' => $currentSeason['start'] ?? null,
+                            'season_end' => $currentSeason['end'] ?? null,
+                            'is_current' => true,
+                        ]
+                    );
+                }
+
+                $competitions = Competition::current()
+                    ->season($season)
+                    ->orderBy('name')
+                    ->get();
+            }
+        }
+
+        return response()->json([
+            'data' => $competitions->map(fn ($competition) => $this->formatCompetition($competition, $includeMatchCount)),
+            'meta' => [
+                'total' => $competitions->count(),
+                'season' => $season,
+            ],
+        ]);
     }
 
     /**
@@ -467,5 +525,34 @@ class FootballController extends Controller
                 })->all(),
             ];
         })->values()->all();
+    }
+
+    /**
+     * Format competition for response.
+     */
+    protected function formatCompetition(Competition $competition, bool $includeMatchCount = true): array
+    {
+        $data = [
+            'id' => $competition->league_id,
+            'name' => $competition->name,
+            'type' => $competition->type,
+            'logo' => $competition->logo,
+            'country' => [
+                'name' => $competition->country,
+                'code' => $competition->country_code,
+                'flag' => $competition->country_flag,
+            ],
+            'season' => [
+                'year' => $competition->season,
+                'start' => $competition->season_start?->toDateString(),
+                'end' => $competition->season_end?->toDateString(),
+            ],
+        ];
+
+        if ($includeMatchCount) {
+            $data['match_count'] = $competition->match_count;
+        }
+
+        return $data;
     }
 }

@@ -214,6 +214,19 @@ class FootballApiService
     }
 
     /**
+     * Get all competitions/leagues for the team in current season.
+     */
+    public function getTeamCompetitions(int $season = null): ?array
+    {
+        $season = $season ?? $this->getCurrentSeason();
+
+        return $this->makeRequest('leagues', [
+            'team' => $this->teamId,
+            'season' => $season,
+        ]);
+    }
+
+    /**
      * Get current football season year.
      */
     public function getCurrentSeason(): int

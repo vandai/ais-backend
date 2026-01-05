@@ -42,6 +42,7 @@ Route::prefix('football')->group(function () {
     Route::get('/results/last', [FootballController::class, 'lastResult']);
     Route::get('/results/{fixture_id}/report', [FootballController::class, 'matchReport']);
     Route::get('/standings', [FootballController::class, 'standings']);
+    Route::get('/standings/all', [FootballController::class, 'allStandings']);
     Route::get('/arsenal/stats', [FootballController::class, 'arsenalStats']);
 });
 

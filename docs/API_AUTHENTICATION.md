@@ -2456,7 +2456,249 @@ Accept: application/json
 
 ---
 
-### 26. Get Arsenal Season Statistics
+### 26. Get All Competition Standings
+
+Get standings for all competitions Arsenal is participating in. This endpoint returns league tables for Premier League, Champions League groups, FA Cup (if applicable), etc.
+
+**Endpoint:** `GET /api/football/standings/all`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `season` | integer | No | current | Season year (e.g., 2025) |
+
+**Request:**
+```http
+GET /api/football/standings/all HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+The response contains standings for each competition. League competitions have a single `standings` array, while cup competitions with groups (like Champions League) have a `groups` array.
+
+```json
+{
+  "data": [
+    {
+      "competition": {
+        "id": 39,
+        "name": "Premier League",
+        "type": "League",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "country": {
+          "name": "England",
+          "code": "GB",
+          "flag": "https://media.api-sports.io/flags/gb.svg"
+        },
+        "season": {
+          "year": 2025,
+          "start": "2025-08-16",
+          "end": "2026-05-24"
+        }
+      },
+      "team_position": {
+        "rank": 1,
+        "team": {
+          "id": 42,
+          "name": "Arsenal",
+          "logo": "https://media.api-sports.io/football/teams/42.png"
+        },
+        "points": 50,
+        "goals_diff": 32,
+        "form": "WWWDW",
+        "description": "Promotion - Champions League",
+        "stats": {
+          "played": 20,
+          "won": 15,
+          "drawn": 5,
+          "lost": 0,
+          "goals_for": 45,
+          "goals_against": 13
+        },
+        "home": { "played": 10, "won": 8, "drawn": 2, "lost": 0, "goals_for": 25, "goals_against": 5 },
+        "away": { "played": 10, "won": 7, "drawn": 3, "lost": 0, "goals_for": 20, "goals_against": 8 }
+      },
+      "standings": [
+        {
+          "rank": 1,
+          "team": { "id": 42, "name": "Arsenal", "logo": "..." },
+          "points": 50,
+          "goals_diff": 32,
+          "form": "WWWDW",
+          "description": "Promotion - Champions League",
+          "stats": { "played": 20, "won": 15, "drawn": 5, "lost": 0, "goals_for": 45, "goals_against": 13 },
+          "home": { "played": 10, "won": 8, "drawn": 2, "lost": 0, "goals_for": 25, "goals_against": 5 },
+          "away": { "played": 10, "won": 7, "drawn": 3, "lost": 0, "goals_for": 20, "goals_against": 8 }
+        },
+        {
+          "rank": 2,
+          "team": { "id": 40, "name": "Liverpool", "logo": "..." },
+          "points": 48,
+          "goals_diff": 28,
+          "form": "WDWWW"
+        }
+      ]
+    },
+    {
+      "competition": {
+        "id": 2,
+        "name": "UEFA Champions League",
+        "type": "Cup",
+        "logo": "https://media.api-sports.io/football/leagues/2.png",
+        "country": {
+          "name": "World",
+          "code": null,
+          "flag": null
+        },
+        "season": {
+          "year": 2025,
+          "start": "2025-09-17",
+          "end": "2026-05-30"
+        }
+      },
+      "team_position": {
+        "rank": 1,
+        "team": { "id": 42, "name": "Arsenal", "logo": "..." },
+        "points": 12,
+        "goals_diff": 8,
+        "form": "WWWW",
+        "description": "Qualified to Round of 16"
+      },
+      "groups": [
+        {
+          "name": "Group B",
+          "standings": [
+            {
+              "rank": 1,
+              "team": { "id": 42, "name": "Arsenal", "logo": "..." },
+              "points": 12,
+              "goals_diff": 8,
+              "form": "WWWW",
+              "description": "Qualified"
+            },
+            {
+              "rank": 2,
+              "team": { "id": 157, "name": "Bayern Munich", "logo": "..." },
+              "points": 9,
+              "goals_diff": 5,
+              "form": "WWLD"
+            },
+            {
+              "rank": 3,
+              "team": { "id": 496, "name": "PSV", "logo": "..." },
+              "points": 4,
+              "goals_diff": -2,
+              "form": "LDWD"
+            },
+            {
+              "rank": 4,
+              "team": { "id": 211, "name": "Sevilla", "logo": "..." },
+              "points": 1,
+              "goals_diff": -11,
+              "form": "LLLD"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "total_competitions": 2,
+    "season": 2025
+  }
+}
+```
+
+**Response Structure:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `competition` | object | Competition details (id, name, type, logo, country, season) |
+| `team_position` | object\|null | Arsenal's position in this competition |
+| `standings` | array | League table (for league competitions) |
+| `groups` | array | Groups with standings (for cup competitions with group stages) |
+
+**Frontend Usage - Display All Standings:**
+
+```typescript
+// TypeScript interfaces
+interface StandingTeam {
+  rank: number;
+  team: { id: number; name: string; logo: string };
+  points: number;
+  goals_diff: number;
+  form: string;
+  description: string;
+  stats: { played: number; won: number; drawn: number; lost: number; goals_for: number; goals_against: number };
+  home: { played: number; won: number; drawn: number; lost: number; goals_for: number; goals_against: number };
+  away: { played: number; won: number; drawn: number; lost: number; goals_for: number; goals_against: number };
+}
+
+interface CompetitionStanding {
+  competition: Competition;
+  team_position: StandingTeam | null;
+  standings?: StandingTeam[];
+  groups?: { name: string; standings: StandingTeam[] }[];
+}
+
+// React component example
+const AllStandings = () => {
+  const [data, setData] = useState<CompetitionStanding[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/football/standings/all')
+      .then(res => res.json())
+      .then(res => setData(res.data));
+  }, []);
+
+  return (
+    <div className="standings-container">
+      {data.map(comp => (
+        <div key={comp.competition.id} className="competition-standings">
+          <div className="competition-header">
+            <img src={comp.competition.logo} alt={comp.competition.name} width="32" />
+            <h3>{comp.competition.name}</h3>
+            {comp.team_position && (
+              <span className="arsenal-position">
+                Arsenal: {comp.team_position.rank}
+                {getOrdinalSuffix(comp.team_position.rank)} ({comp.team_position.points} pts)
+              </span>
+            )}
+          </div>
+
+          {comp.standings && (
+            <StandingsTable standings={comp.standings} />
+          )}
+
+          {comp.groups && comp.groups.map(group => (
+            <div key={group.name} className="group">
+              <h4>{group.name}</h4>
+              <StandingsTable standings={group.standings} />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Helper function
+const getOrdinalSuffix = (n: number) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+};
+```
+
+---
+
+### 27. Get Arsenal Season Statistics
 
 Get Arsenal's season statistics summary.
 

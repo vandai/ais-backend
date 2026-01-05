@@ -133,37 +133,62 @@ class SyncFootballData extends Command
     }
 
     /**
-     * Sync league standings.
+     * Sync league standings for all competitions.
      */
     protected function syncLeagueStandings(int $season): void
     {
-        $this->info("Syncing Premier League standings for season {$season}...");
+        $this->info("Syncing standings for all competitions in season {$season}...");
 
-        $standings = $this->footballApi->getLeagueTable($season);
+        // Get all competitions first
+        $competitions = Competition::current()->season($season)->get();
 
-        if (empty($standings)) {
-            $this->warn('No standings data received from API');
-            return;
+        if ($competitions->isEmpty()) {
+            // If no competitions in DB, sync them first
+            $this->syncCompetitions($season);
+            $competitions = Competition::current()->season($season)->get();
         }
 
-        // API returns standings nested in league structure
-        $leagueData = $standings[0] ?? null;
+        $totalCount = 0;
 
-        if (!$leagueData || empty($leagueData['league']['standings'])) {
-            $this->warn('Invalid standings data structure');
-            return;
+        foreach ($competitions as $competition) {
+            $this->info("Fetching standings for {$competition->name}...");
+
+            $standings = $this->footballApi->getLeagueTable($season, $competition->league_id);
+
+            if (empty($standings)) {
+                $this->warn("No standings data for {$competition->name}");
+                continue;
+            }
+
+            // API returns standings nested in league structure
+            $leagueData = $standings[0] ?? null;
+
+            if (!$leagueData || empty($leagueData['league']['standings'])) {
+                $this->warn("Invalid standings structure for {$competition->name}");
+                continue;
+            }
+
+            $league = $leagueData['league'];
+
+            // Handle different standings formats (groups for cups, single for leagues)
+            $allStandings = $league['standings'] ?? [];
+
+            $count = 0;
+            foreach ($allStandings as $groupStandings) {
+                foreach ($groupStandings as $teamStanding) {
+                    $this->upsertLeagueTable($league, $teamStanding, $season);
+                    $count++;
+                }
+            }
+
+            $this->info("Synced {$count} entries for {$competition->name}");
+            $totalCount += $count;
+
+            // Small delay to avoid rate limiting
+            usleep(250000); // 250ms
         }
 
-        $league = $leagueData['league'];
-        $standingsData = $league['standings'][0] ?? [];
-
-        $count = 0;
-        foreach ($standingsData as $teamStanding) {
-            $this->upsertLeagueTable($league, $teamStanding, $season);
-            $count++;
-        }
-
-        $this->info("Synced {$count} league table entries");
+        $this->info("Total: Synced {$totalCount} league table entries across all competitions");
     }
 
     /**

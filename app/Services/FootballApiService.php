@@ -120,7 +120,7 @@ class FootballApiService
     }
 
     /**
-     * Get Premier League standings.
+     * Get league standings.
      */
     public function getLeagueTable(int $season = null, int $leagueId = null): ?array
     {
@@ -131,6 +131,47 @@ class FootballApiService
             'league' => $leagueId,
             'season' => $season,
         ]);
+    }
+
+    /**
+     * Get standings for all competitions the team is in.
+     */
+    public function getAllCompetitionStandings(int $season = null): array
+    {
+        $season = $season ?? $this->getCurrentSeason();
+
+        // First get all competitions
+        $competitions = $this->getTeamCompetitions($season);
+
+        if (empty($competitions)) {
+            return [];
+        }
+
+        $standings = [];
+        foreach ($competitions as $competition) {
+            $leagueId = $competition['league']['id'] ?? null;
+            $leagueType = $competition['league']['type'] ?? null;
+
+            if (!$leagueId) {
+                continue;
+            }
+
+            // Only fetch standings for leagues (not cups without group stages)
+            $leagueStandings = $this->getLeagueTable($season, $leagueId);
+
+            if ($leagueStandings) {
+                $standings[] = [
+                    'league' => $competition['league'],
+                    'country' => $competition['country'],
+                    'standings' => $leagueStandings,
+                ];
+            }
+
+            // Small delay to avoid rate limiting
+            usleep(100000); // 100ms
+        }
+
+        return $standings;
     }
 
     /**

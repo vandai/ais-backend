@@ -154,6 +154,68 @@ class FootballController extends Controller
     }
 
     /**
+     * Get standings for all competitions Arsenal is in.
+     */
+    public function allStandings(Request $request): JsonResponse
+    {
+        $season = $request->input('season', $this->footballApi->getCurrentSeason());
+
+        // Get all competitions
+        $competitions = Competition::current()->season($season)->get();
+
+        if ($competitions->isEmpty()) {
+            return response()->json([
+                'data' => [],
+                'message' => 'No competitions found',
+            ]);
+        }
+
+        $allStandings = [];
+
+        foreach ($competitions as $competition) {
+            $standings = LeagueTable::forLeague($competition->league_id, $season)->get();
+
+            if ($standings->isEmpty()) {
+                continue;
+            }
+
+            // Get the configured team's position
+            $teamPosition = $standings->firstWhere('team_id', $this->footballApi->getTeamId());
+
+            // Group standings by group if applicable (for cup competitions)
+            $groupedStandings = $standings->groupBy('group');
+
+            $competitionData = [
+                'competition' => $this->formatCompetition($competition, false),
+                'team_position' => $teamPosition ? $this->formatStanding($teamPosition) : null,
+            ];
+
+            if ($groupedStandings->count() > 1) {
+                // Multiple groups (e.g., Champions League groups)
+                $competitionData['groups'] = $groupedStandings->map(function ($groupTeams, $groupName) {
+                    return [
+                        'name' => $groupName ?: 'Group',
+                        'standings' => $groupTeams->map(fn ($team) => $this->formatStanding($team))->values(),
+                    ];
+                })->values();
+            } else {
+                // Single table (e.g., Premier League)
+                $competitionData['standings'] = $standings->map(fn ($team) => $this->formatStanding($team));
+            }
+
+            $allStandings[] = $competitionData;
+        }
+
+        return response()->json([
+            'data' => $allStandings,
+            'meta' => [
+                'total_competitions' => count($allStandings),
+                'season' => $season,
+            ],
+        ]);
+    }
+
+    /**
      * Get Arsenal's season statistics.
      */
     public function arsenalStats(Request $request): JsonResponse

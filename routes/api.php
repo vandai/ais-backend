@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\FootballController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
@@ -31,6 +32,16 @@ Route::get('/news/{news_id}', [NewsController::class, 'show']);
 
 // Categories endpoints (public)
 Route::get('/categories', [CategoryController::class, 'index']);
+
+// Football endpoints (public)
+Route::prefix('football')->group(function () {
+    Route::get('/fixtures', [FootballController::class, 'fixtures']);
+    Route::get('/fixtures/next', [FootballController::class, 'nextFixture']);
+    Route::get('/results', [FootballController::class, 'results']);
+    Route::get('/results/last', [FootballController::class, 'lastResult']);
+    Route::get('/standings', [FootballController::class, 'standings']);
+    Route::get('/arsenal/stats', [FootballController::class, 'arsenalStats']);
+});
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {

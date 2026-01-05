@@ -37,6 +37,7 @@ return [
 
     'football_api' => [
         'key' => env('API_FOOTBALL_KEY'),
+        'team_id' => env('API_FOOTBALL_TEAM_ID', 42),
     ],
 
 ];

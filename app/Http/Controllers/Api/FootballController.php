@@ -80,12 +80,12 @@ class FootballController extends Controller
 
         $standings = LeagueTable::forLeague($leagueId, $season)->get();
 
-        // Get Arsenal's position
-        $arsenalPosition = $standings->firstWhere('team_id', $this->footballApi->getArsenalTeamId());
+        // Get the configured team's position
+        $teamPosition = $standings->firstWhere('team_id', $this->footballApi->getTeamId());
 
         return response()->json([
             'data' => $standings->map(fn ($team) => $this->formatStanding($team)),
-            'arsenal' => $arsenalPosition ? $this->formatStanding($arsenalPosition) : null,
+            'team' => $teamPosition ? $this->formatStanding($teamPosition) : null,
             'meta' => [
                 'total' => $standings->count(),
                 'season' => $season,
@@ -120,7 +120,7 @@ class FootballController extends Controller
         });
 
         // Get current league position
-        $leaguePosition = LeagueTable::where('team_id', $this->footballApi->getArsenalTeamId())
+        $leaguePosition = LeagueTable::where('team_id', $this->footballApi->getTeamId())
             ->where('season', $season)
             ->where('league_id', $this->footballApi->getPremierLeagueId())
             ->first();
@@ -182,7 +182,7 @@ class FootballController extends Controller
      */
     public function lastResult(): JsonResponse
     {
-        $result = MatchResult::orderBy('match_date', 'desc')->first();
+        $result = MatchResult::forTeam()->orderBy('match_date', 'desc')->first();
 
         if (!$result) {
             return response()->json([

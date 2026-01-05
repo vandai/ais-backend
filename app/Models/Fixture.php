@@ -9,6 +9,14 @@ class Fixture extends Model
 {
     use HasFactory;
 
+    /**
+     * Get the configured team ID.
+     */
+    public static function getTeamId(): int
+    {
+        return (int) config('services.football_api.team_id', 42);
+    }
+
     protected $fillable = [
         'fixture_id',
         'referee',
@@ -51,11 +59,24 @@ class Fixture extends Model
     }
 
     /**
-     * Scope to get upcoming fixtures.
+     * Scope to filter fixtures for the configured team.
+     */
+    public function scopeForTeam($query)
+    {
+        $teamId = static::getTeamId();
+        return $query->where(function ($q) use ($teamId) {
+            $q->where('home_team_id', $teamId)
+              ->orWhere('away_team_id', $teamId);
+        });
+    }
+
+    /**
+     * Scope to get upcoming fixtures for the team.
      */
     public function scopeUpcoming($query)
     {
-        return $query->where('match_date', '>', now())
+        return $query->forTeam()
+            ->where('match_date', '>', now())
             ->orderBy('match_date', 'asc');
     }
 
@@ -76,11 +97,19 @@ class Fixture extends Model
     }
 
     /**
-     * Check if Arsenal is home team.
+     * Check if the configured team is home team.
+     */
+    public function isTeamHome(): bool
+    {
+        return $this->home_team_id === static::getTeamId();
+    }
+
+    /**
+     * Alias for isTeamHome for backward compatibility.
      */
     public function isArsenalHome(): bool
     {
-        return $this->home_team_id === 42;
+        return $this->isTeamHome();
     }
 
     /**

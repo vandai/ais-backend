@@ -9,6 +9,14 @@ class LeagueTable extends Model
 {
     use HasFactory;
 
+    /**
+     * Get the configured team ID.
+     */
+    public static function getTeamId(): int
+    {
+        return (int) config('services.football_api.team_id', 42);
+    }
+
     protected $fillable = [
         'league_id',
         'league_name',
@@ -100,11 +108,19 @@ class LeagueTable extends Model
     }
 
     /**
-     * Scope to get Arsenal's position.
+     * Scope to get the configured team's position.
+     */
+    public function scopeForTeam($query)
+    {
+        return $query->where('team_id', static::getTeamId());
+    }
+
+    /**
+     * Alias for scopeForTeam for backward compatibility.
      */
     public function scopeArsenal($query)
     {
-        return $query->where('team_id', 42);
+        return $query->forTeam();
     }
 
     /**

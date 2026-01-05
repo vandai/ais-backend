@@ -10,12 +10,13 @@ class FootballApiService
 {
     protected string $baseUrl = 'https://v3.football.api-sports.io';
     protected ?string $apiKey;
-    protected int $arsenalTeamId = 42;
+    protected int $teamId;
     protected int $premierLeagueId = 39;
 
     public function __construct()
     {
         $this->apiKey = config('services.football_api.key');
+        $this->teamId = (int) config('services.football_api.team_id', 42);
     }
 
     /**
@@ -76,7 +77,7 @@ class FootballApiService
         $season = $season ?? $this->getCurrentSeason();
 
         return $this->makeRequest('fixtures', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'season' => $season,
             'status' => $status,
         ]);
@@ -88,7 +89,7 @@ class FootballApiService
     public function getNextFixtures(int $count = 5): ?array
     {
         return $this->makeRequest('fixtures', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'next' => $count,
         ]);
     }
@@ -99,7 +100,7 @@ class FootballApiService
     public function getLastResults(int $count = 5): ?array
     {
         return $this->makeRequest('fixtures', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'last' => $count,
         ]);
     }
@@ -112,7 +113,7 @@ class FootballApiService
         $season = $season ?? $this->getCurrentSeason();
 
         return $this->makeRequest('fixtures', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'season' => $season,
             'status' => 'FT-AET-PEN',
         ]);
@@ -141,7 +142,7 @@ class FootballApiService
         $leagueId = $leagueId ?? $this->premierLeagueId;
 
         return $this->makeRequest('teams/statistics', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'league' => $leagueId,
             'season' => $season,
         ]);
@@ -160,12 +161,12 @@ class FootballApiService
     }
 
     /**
-     * Get live fixtures for Arsenal.
+     * Get live fixtures for the team.
      */
     public function getLiveFixtures(): ?array
     {
         return $this->makeRequest('fixtures', [
-            'team' => $this->arsenalTeamId,
+            'team' => $this->teamId,
             'live' => 'all',
         ]);
     }
@@ -182,11 +183,11 @@ class FootballApiService
     }
 
     /**
-     * Get Arsenal team ID.
+     * Get team ID.
      */
-    public function getArsenalTeamId(): int
+    public function getTeamId(): int
     {
-        return $this->arsenalTeamId;
+        return $this->teamId;
     }
 
     /**

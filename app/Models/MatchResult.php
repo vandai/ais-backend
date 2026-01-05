@@ -9,6 +9,14 @@ class MatchResult extends Model
 {
     use HasFactory;
 
+    /**
+     * Get the configured team ID.
+     */
+    public static function getTeamId(): int
+    {
+        return (int) config('services.football_api.team_id', 42);
+    }
+
     protected $fillable = [
         'fixture_id',
         'referee',
@@ -72,11 +80,23 @@ class MatchResult extends Model
     }
 
     /**
-     * Scope to get recent results.
+     * Scope to filter results for the configured team.
+     */
+    public function scopeForTeam($query)
+    {
+        $teamId = static::getTeamId();
+        return $query->where(function ($q) use ($teamId) {
+            $q->where('home_team_id', $teamId)
+              ->orWhere('away_team_id', $teamId);
+        });
+    }
+
+    /**
+     * Scope to get recent results for the team.
      */
     public function scopeRecent($query, int $limit = 5)
     {
-        return $query->orderBy('match_date', 'desc')->limit($limit);
+        return $query->forTeam()->orderBy('match_date', 'desc')->limit($limit);
     }
 
     /**
@@ -84,7 +104,7 @@ class MatchResult extends Model
      */
     public function scopeSeason($query, int $season)
     {
-        return $query->where('season', $season);
+        return $query->forTeam()->where('season', $season);
     }
 
     /**
@@ -120,11 +140,19 @@ class MatchResult extends Model
     }
 
     /**
-     * Check if Arsenal is home team.
+     * Check if the configured team is home team.
+     */
+    public function isTeamHome(): bool
+    {
+        return $this->home_team_id === static::getTeamId();
+    }
+
+    /**
+     * Alias for isTeamHome for backward compatibility.
      */
     public function isArsenalHome(): bool
     {
-        return $this->home_team_id === 42;
+        return $this->isTeamHome();
     }
 
     /**
@@ -176,22 +204,30 @@ class MatchResult extends Model
     }
 
     /**
-     * Calculate Arsenal's result based on the score.
+     * Calculate team's result based on the score.
      */
-    public static function calculateArsenalResult(int $homeTeamId, int $homeGoals, int $awayGoals): string
+    public static function calculateTeamResult(int $homeTeamId, int $homeGoals, int $awayGoals): string
     {
-        $arsenalTeamId = 42;
-        $isArsenalHome = $homeTeamId === $arsenalTeamId;
+        $teamId = static::getTeamId();
+        $isTeamHome = $homeTeamId === $teamId;
 
-        $arsenalGoals = $isArsenalHome ? $homeGoals : $awayGoals;
-        $opponentGoals = $isArsenalHome ? $awayGoals : $homeGoals;
+        $teamGoals = $isTeamHome ? $homeGoals : $awayGoals;
+        $opponentGoals = $isTeamHome ? $awayGoals : $homeGoals;
 
-        if ($arsenalGoals > $opponentGoals) {
+        if ($teamGoals > $opponentGoals) {
             return 'W';
-        } elseif ($arsenalGoals < $opponentGoals) {
+        } elseif ($teamGoals < $opponentGoals) {
             return 'L';
         }
 
         return 'D';
+    }
+
+    /**
+     * Alias for calculateTeamResult for backward compatibility.
+     */
+    public static function calculateArsenalResult(int $homeTeamId, int $homeGoals, int $awayGoals): string
+    {
+        return static::calculateTeamResult($homeTeamId, $homeGoals, $awayGoals);
     }
 }

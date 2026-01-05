@@ -39,7 +39,11 @@ class PostCategoryResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Forms\Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(function (Forms\Set $set, ?string $state, ?PostCategory $record) {
+                                if ($state) {
+                                    $set('slug', PostCategory::generateUniqueSlug($state, $record?->id));
+                                }
+                            }),
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)

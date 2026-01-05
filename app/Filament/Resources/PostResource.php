@@ -37,7 +37,11 @@ class PostResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Forms\Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get, ?string $state, ?Post $record) {
+                                if ($state) {
+                                    $set('slug', Post::generateUniqueSlug($state, $record?->id));
+                                }
+                            }),
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)

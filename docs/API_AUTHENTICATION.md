@@ -1152,6 +1152,536 @@ Accept: application/json
 
 ---
 
+## Football API Endpoints
+
+The Football API provides Arsenal FC match data, fixtures, results, and league standings. Data is fetched from api-football.com and cached locally, with automatic sync every 6 hours.
+
+### 19. Get Upcoming Fixtures
+
+Get Arsenal's upcoming matches.
+
+**Endpoint:** `GET /api/football/fixtures`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `limit` | integer | No | 5 | Number of fixtures to return |
+| `season` | integer | No | current | Season year (e.g., 2025) |
+
+**Request:**
+```http
+GET /api/football/fixtures?limit=5 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": 1234567,
+      "date": "2026-01-15T15:00:00+00:00",
+      "timestamp": 1736953200,
+      "venue": {
+        "name": "Emirates Stadium",
+        "city": "London"
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "round": "Regular Season - 21",
+        "logo": "https://media.api-sports.io/football/leagues/39.png"
+      },
+      "home": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "away": {
+        "id": 33,
+        "name": "Manchester United",
+        "logo": "https://media.api-sports.io/football/teams/33.png"
+      },
+      "arsenal": {
+        "is_home": true,
+        "opponent": "Manchester United",
+        "opponent_logo": "https://media.api-sports.io/football/teams/33.png",
+        "venue_type": "H"
+      },
+      "status": {
+        "long": "Not Started",
+        "short": "NS"
+      }
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "season": 2025
+  }
+}
+```
+
+---
+
+### 20. Get Next Fixture
+
+Get Arsenal's next upcoming match.
+
+**Endpoint:** `GET /api/football/fixtures/next`
+
+**Authentication Required:** No
+
+**Request:**
+```http
+GET /api/football/fixtures/next HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": {
+    "id": 1234567,
+    "date": "2026-01-15T15:00:00+00:00",
+    "timestamp": 1736953200,
+    "venue": {
+      "name": "Emirates Stadium",
+      "city": "London"
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "round": "Regular Season - 21",
+      "logo": "https://media.api-sports.io/football/leagues/39.png"
+    },
+    "home": {
+      "id": 42,
+      "name": "Arsenal",
+      "logo": "https://media.api-sports.io/football/teams/42.png"
+    },
+    "away": {
+      "id": 33,
+      "name": "Manchester United",
+      "logo": "https://media.api-sports.io/football/teams/33.png"
+    },
+    "arsenal": {
+      "is_home": true,
+      "opponent": "Manchester United",
+      "opponent_logo": "https://media.api-sports.io/football/teams/33.png",
+      "venue_type": "H"
+    },
+    "status": {
+      "long": "Not Started",
+      "short": "NS"
+    }
+  }
+}
+```
+
+**No Upcoming Fixtures Response:**
+```json
+{
+  "data": null,
+  "message": "No upcoming fixtures found"
+}
+```
+
+---
+
+### 21. Get Match Results
+
+Get Arsenal's match results.
+
+**Endpoint:** `GET /api/football/results`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `limit` | integer | No | 10 | Number of results to return |
+| `season` | integer | No | current | Season year (e.g., 2025) |
+| `league_id` | integer | No | - | Filter by league ID (39 = Premier League) |
+
+**Request:**
+```http
+GET /api/football/results?limit=5&season=2025 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "id": 1234566,
+      "date": "2026-01-10T20:00:00+00:00",
+      "venue": {
+        "name": "Tottenham Hotspur Stadium",
+        "city": "London"
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "round": "Regular Season - 20",
+        "logo": "https://media.api-sports.io/football/leagues/39.png"
+      },
+      "home": {
+        "id": 47,
+        "name": "Tottenham",
+        "logo": "https://media.api-sports.io/football/teams/47.png",
+        "goals": 1
+      },
+      "away": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png",
+        "goals": 2
+      },
+      "score": {
+        "home": 1,
+        "away": 2,
+        "display": "1 - 2",
+        "halftime": {
+          "home": 0,
+          "away": 1
+        }
+      },
+      "arsenal": {
+        "is_home": false,
+        "opponent": "Tottenham",
+        "opponent_logo": "https://media.api-sports.io/football/teams/47.png",
+        "venue_type": "A",
+        "goals_for": 2,
+        "goals_against": 1,
+        "result": "W"
+      }
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "season": 2025
+  }
+}
+```
+
+---
+
+### 22. Get Last Match Result
+
+Get Arsenal's most recent match result.
+
+**Endpoint:** `GET /api/football/results/last`
+
+**Authentication Required:** No
+
+**Request:**
+```http
+GET /api/football/results/last HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": {
+    "id": 1234566,
+    "date": "2026-01-10T20:00:00+00:00",
+    "venue": {
+      "name": "Emirates Stadium",
+      "city": "London"
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "round": "Regular Season - 20",
+      "logo": "https://media.api-sports.io/football/leagues/39.png"
+    },
+    "home": {
+      "id": 42,
+      "name": "Arsenal",
+      "logo": "https://media.api-sports.io/football/teams/42.png",
+      "goals": 3
+    },
+    "away": {
+      "id": 40,
+      "name": "Liverpool",
+      "logo": "https://media.api-sports.io/football/teams/40.png",
+      "goals": 1
+    },
+    "score": {
+      "home": 3,
+      "away": 1,
+      "display": "3 - 1",
+      "halftime": {
+        "home": 1,
+        "away": 0
+      }
+    },
+    "arsenal": {
+      "is_home": true,
+      "opponent": "Liverpool",
+      "opponent_logo": "https://media.api-sports.io/football/teams/40.png",
+      "venue_type": "H",
+      "goals_for": 3,
+      "goals_against": 1,
+      "result": "W"
+    }
+  }
+}
+```
+
+**No Results Response:**
+```json
+{
+  "data": null,
+  "message": "No match results found"
+}
+```
+
+---
+
+### 23. Get League Standings
+
+Get league table/standings.
+
+**Endpoint:** `GET /api/football/standings`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `season` | integer | No | current | Season year (e.g., 2025) |
+| `league_id` | integer | No | 39 | League ID (39 = Premier League) |
+
+**Request:**
+```http
+GET /api/football/standings?season=2025 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "rank": 1,
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "points": 50,
+      "goals_diff": 32,
+      "form": "WWWDW",
+      "description": "Promotion - Champions League (Group Stage: )",
+      "stats": {
+        "played": 20,
+        "won": 15,
+        "drawn": 5,
+        "lost": 0,
+        "goals_for": 45,
+        "goals_against": 13
+      },
+      "home": {
+        "played": 10,
+        "won": 8,
+        "drawn": 2,
+        "lost": 0,
+        "goals_for": 25,
+        "goals_against": 5
+      },
+      "away": {
+        "played": 10,
+        "won": 7,
+        "drawn": 3,
+        "lost": 0,
+        "goals_for": 20,
+        "goals_against": 8
+      }
+    },
+    {
+      "rank": 2,
+      "team": {
+        "id": 40,
+        "name": "Liverpool",
+        "logo": "https://media.api-sports.io/football/teams/40.png"
+      },
+      "points": 48,
+      "goals_diff": 28,
+      "form": "WDWWW",
+      "description": "Promotion - Champions League (Group Stage: )",
+      "stats": {
+        "played": 20,
+        "won": 14,
+        "drawn": 6,
+        "lost": 0,
+        "goals_for": 42,
+        "goals_against": 14
+      },
+      "home": {
+        "played": 10,
+        "won": 8,
+        "drawn": 2,
+        "lost": 0,
+        "goals_for": 24,
+        "goals_against": 6
+      },
+      "away": {
+        "played": 10,
+        "won": 6,
+        "drawn": 4,
+        "lost": 0,
+        "goals_for": 18,
+        "goals_against": 8
+      }
+    }
+  ],
+  "team": {
+    "rank": 1,
+    "team": {
+      "id": 42,
+      "name": "Arsenal",
+      "logo": "https://media.api-sports.io/football/teams/42.png"
+    },
+    "points": 50,
+    "goals_diff": 32,
+    "form": "WWWDW",
+    "description": "Promotion - Champions League (Group Stage: )",
+    "stats": {
+      "played": 20,
+      "won": 15,
+      "drawn": 5,
+      "lost": 0,
+      "goals_for": 45,
+      "goals_against": 13
+    },
+    "home": {
+      "played": 10,
+      "won": 8,
+      "drawn": 2,
+      "lost": 0,
+      "goals_for": 25,
+      "goals_against": 5
+    },
+    "away": {
+      "played": 10,
+      "won": 7,
+      "drawn": 3,
+      "lost": 0,
+      "goals_for": 20,
+      "goals_against": 8
+    }
+  },
+  "meta": {
+    "total": 20,
+    "season": 2025,
+    "league_id": 39,
+    "league_name": "Premier League"
+  }
+}
+```
+
+---
+
+### 24. Get Arsenal Season Statistics
+
+Get Arsenal's season statistics summary.
+
+**Endpoint:** `GET /api/football/arsenal/stats`
+
+**Authentication Required:** No
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `season` | integer | No | current | Season year (e.g., 2025) |
+
+**Request:**
+```http
+GET /api/football/arsenal/stats?season=2025 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": {
+    "season": 2025,
+    "matches": {
+      "played": 25,
+      "won": 18,
+      "drawn": 5,
+      "lost": 2
+    },
+    "goals": {
+      "for": 55,
+      "against": 18,
+      "difference": 37
+    },
+    "form": "WWDWW",
+    "league_position": {
+      "rank": 1,
+      "points": 59,
+      "played": 25
+    }
+  }
+}
+```
+
+---
+
+### Football API Response Fields
+
+**Arsenal Object:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `is_home` | boolean | Whether Arsenal is the home team |
+| `opponent` | string | Opponent team name |
+| `opponent_logo` | string | Opponent team logo URL |
+| `venue_type` | string | `H` for home, `A` for away |
+| `goals_for` | integer | Goals scored by Arsenal (results only) |
+| `goals_against` | integer | Goals conceded by Arsenal (results only) |
+| `result` | string | `W` = Win, `D` = Draw, `L` = Loss (results only) |
+
+**League IDs:**
+
+| ID | League |
+|----|--------|
+| 39 | Premier League |
+| 2 | UEFA Champions League |
+| 3 | UEFA Europa League |
+| 45 | FA Cup |
+| 48 | EFL Cup (League Cup) |
+
+---
+
 ## User Roles
 
 The system supports two user roles:

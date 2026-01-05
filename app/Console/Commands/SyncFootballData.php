@@ -20,6 +20,7 @@ class SyncFootballData extends Command
                             {--fixtures : Sync only fixtures}
                             {--results : Sync only match results}
                             {--standings : Sync only league standings}
+                            {--details : Sync match details for last 20 matches}
                             {--season= : Specific season to sync (default: current)}';
 
     /**
@@ -45,7 +46,7 @@ class SyncFootballData extends Command
         $this->info('Starting football data sync...');
 
         $season = $this->option('season') ?? $this->footballApi->getCurrentSeason();
-        $syncAll = !$this->option('fixtures') && !$this->option('results') && !$this->option('standings');
+        $syncAll = !$this->option('fixtures') && !$this->option('results') && !$this->option('standings') && !$this->option('details');
 
         try {
             if ($syncAll || $this->option('fixtures')) {
@@ -58,6 +59,10 @@ class SyncFootballData extends Command
 
             if ($syncAll || $this->option('standings')) {
                 $this->syncLeagueStandings($season);
+            }
+
+            if ($syncAll || $this->option('details')) {
+                $this->syncMatchDetails();
             }
 
             $this->info('Football data sync completed successfully!');
@@ -298,5 +303,46 @@ class SyncFootballData extends Command
                 'last_updated' => now(),
             ]
         );
+    }
+
+    /**
+     * Sync match details for the last 20 matches.
+     */
+    protected function syncMatchDetails(): void
+    {
+        $this->info('Syncing match details for last 20 matches...');
+
+        // Get last 20 matches that don't have details fetched yet, or all if forced
+        $matches = MatchResult::forTeam()
+            ->where('details_fetched', false)
+            ->orderBy('match_date', 'desc')
+            ->limit(20)
+            ->get();
+
+        if ($matches->isEmpty()) {
+            $this->info('No matches need detail syncing');
+            return;
+        }
+
+        $count = 0;
+        foreach ($matches as $match) {
+            $this->info("Fetching details for fixture {$match->fixture_id}...");
+
+            $details = $this->footballApi->getMatchDetails($match->fixture_id);
+
+            $match->update([
+                'events' => $details['events'],
+                'lineups' => $details['lineups'],
+                'statistics' => $details['statistics'],
+                'details_fetched' => true,
+            ]);
+
+            $count++;
+
+            // Small delay to avoid hitting API rate limits
+            usleep(250000); // 250ms delay between requests
+        }
+
+        $this->info("Synced details for {$count} matches");
     }
 }

@@ -1457,7 +1457,252 @@ Accept: application/json
 
 ---
 
-### 23. Get League Standings
+### 23. Get Match Report
+
+Get detailed match report including events, lineups, and statistics.
+
+**Endpoint:** `GET /api/football/results/{fixture_id}/report`
+
+**Authentication Required:** No
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `fixture_id` | integer | Yes | The fixture ID from the match result |
+
+**Request:**
+```http
+GET /api/football/results/1234566/report HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+**Success Response:**
+- Status: `200 OK`
+
+```json
+{
+  "data": {
+    "match": {
+      "id": 1234566,
+      "date": "2026-01-10T20:00:00+00:00",
+      "venue": {
+        "name": "Emirates Stadium",
+        "city": "London"
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "round": "Regular Season - 20",
+        "logo": "https://media.api-sports.io/football/leagues/39.png"
+      },
+      "home": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png",
+        "goals": 3
+      },
+      "away": {
+        "id": 40,
+        "name": "Liverpool",
+        "logo": "https://media.api-sports.io/football/teams/40.png",
+        "goals": 1
+      },
+      "score": {
+        "home": 3,
+        "away": 1,
+        "display": "3 - 1",
+        "halftime": {
+          "home": 1,
+          "away": 0
+        }
+      },
+      "arsenal": {
+        "is_home": true,
+        "opponent": "Liverpool",
+        "opponent_logo": "https://media.api-sports.io/football/teams/40.png",
+        "venue_type": "H",
+        "goals_for": 3,
+        "goals_against": 1,
+        "result": "W"
+      }
+    },
+    "events": [
+      {
+        "time": {
+          "elapsed": 23,
+          "extra": null
+        },
+        "team": {
+          "id": 42,
+          "name": "Arsenal",
+          "logo": "https://media.api-sports.io/football/teams/42.png"
+        },
+        "player": {
+          "id": 1234,
+          "name": "B. Saka"
+        },
+        "assist": {
+          "id": 5678,
+          "name": "M. Odegaard"
+        },
+        "type": "Goal",
+        "detail": "Normal Goal",
+        "comments": null
+      },
+      {
+        "time": {
+          "elapsed": 45,
+          "extra": 2
+        },
+        "team": {
+          "id": 40,
+          "name": "Liverpool",
+          "logo": "https://media.api-sports.io/football/teams/40.png"
+        },
+        "player": {
+          "id": 9876,
+          "name": "M. Salah"
+        },
+        "assist": {
+          "id": null,
+          "name": null
+        },
+        "type": "Card",
+        "detail": "Yellow Card",
+        "comments": "Foul"
+      }
+    ],
+    "lineups": [
+      {
+        "team": {
+          "id": 42,
+          "name": "Arsenal",
+          "logo": "https://media.api-sports.io/football/teams/42.png",
+          "colors": {
+            "player": {
+              "primary": "ff0000",
+              "number": "ffffff",
+              "border": "ff0000"
+            },
+            "goalkeeper": {
+              "primary": "000000",
+              "number": "ffffff",
+              "border": "000000"
+            }
+          }
+        },
+        "formation": "4-3-3",
+        "coach": {
+          "id": 123,
+          "name": "M. Arteta",
+          "photo": "https://media.api-sports.io/football/coachs/123.png"
+        },
+        "startXI": [
+          {
+            "id": 100,
+            "name": "D. Raya",
+            "number": 22,
+            "pos": "G",
+            "grid": "1:1"
+          },
+          {
+            "id": 101,
+            "name": "B. White",
+            "number": 4,
+            "pos": "D",
+            "grid": "2:4"
+          }
+        ],
+        "substitutes": [
+          {
+            "id": 200,
+            "name": "K. Havertz",
+            "number": 29,
+            "pos": "F"
+          }
+        ]
+      }
+    ],
+    "statistics": [
+      {
+        "team": {
+          "id": 42,
+          "name": "Arsenal",
+          "logo": "https://media.api-sports.io/football/teams/42.png"
+        },
+        "statistics": {
+          "shots_on_goal": 8,
+          "shots_off_goal": 5,
+          "total_shots": 15,
+          "blocked_shots": 2,
+          "shots_insidebox": 10,
+          "shots_outsidebox": 5,
+          "fouls": 12,
+          "corner_kicks": 7,
+          "offsides": 2,
+          "ball_possession": "62%",
+          "yellow_cards": 1,
+          "red_cards": 0,
+          "goalkeeper_saves": 3,
+          "total_passes": 542,
+          "passes_accurate": 478,
+          "passes_%": "88%"
+        }
+      },
+      {
+        "team": {
+          "id": 40,
+          "name": "Liverpool",
+          "logo": "https://media.api-sports.io/football/teams/40.png"
+        },
+        "statistics": {
+          "shots_on_goal": 4,
+          "shots_off_goal": 3,
+          "total_shots": 9,
+          "blocked_shots": 2,
+          "shots_insidebox": 5,
+          "shots_outsidebox": 4,
+          "fouls": 15,
+          "corner_kicks": 4,
+          "offsides": 1,
+          "ball_possession": "38%",
+          "yellow_cards": 2,
+          "red_cards": 0,
+          "goalkeeper_saves": 5,
+          "total_passes": 328,
+          "passes_accurate": 267,
+          "passes_%": "81%"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Not Found Response:**
+- Status: `404 Not Found`
+
+```json
+{
+  "data": null,
+  "message": "Match not found"
+}
+```
+
+**Event Types:**
+
+| Type | Description |
+|------|-------------|
+| `Goal` | Goal scored (detail: Normal Goal, Own Goal, Penalty) |
+| `Card` | Card shown (detail: Yellow Card, Red Card) |
+| `subst` | Substitution made |
+| `Var` | VAR decision |
+
+---
+
+### 24. Get League Standings
 
 Get league table/standings.
 
@@ -1605,7 +1850,7 @@ Accept: application/json
 
 ---
 
-### 24. Get Arsenal Season Statistics
+### 25. Get Arsenal Season Statistics
 
 Get Arsenal's season statistics summary.
 

@@ -52,6 +52,10 @@ class MatchResult extends Model
         'status_short',
         'status_elapsed',
         'arsenal_result',
+        'events',
+        'lineups',
+        'statistics',
+        'details_fetched',
     ];
 
     protected function casts(): array
@@ -76,6 +80,10 @@ class MatchResult extends Model
             'home_goals_penalty' => 'integer',
             'away_goals_penalty' => 'integer',
             'status_elapsed' => 'integer',
+            'events' => 'array',
+            'lineups' => 'array',
+            'statistics' => 'array',
+            'details_fetched' => 'boolean',
         ];
     }
 

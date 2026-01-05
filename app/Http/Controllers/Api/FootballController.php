@@ -197,6 +197,39 @@ class FootballController extends Controller
     }
 
     /**
+     * Get match report detail.
+     */
+    public function matchReport(int $fixtureId): JsonResponse
+    {
+        $result = MatchResult::where('fixture_id', $fixtureId)->first();
+
+        if (!$result) {
+            return response()->json([
+                'data' => null,
+                'message' => 'Match not found',
+            ], 404);
+        }
+
+        // If details not fetched yet, try to fetch from API
+        if (!$result->details_fetched) {
+            $details = $this->footballApi->getMatchDetails($fixtureId);
+
+            $result->update([
+                'events' => $details['events'],
+                'lineups' => $details['lineups'],
+                'statistics' => $details['statistics'],
+                'details_fetched' => true,
+            ]);
+
+            $result->refresh();
+        }
+
+        return response()->json([
+            'data' => $this->formatMatchReport($result),
+        ]);
+    }
+
+    /**
      * Format fixture for response.
      */
     protected function formatFixture(Fixture $fixture): array
@@ -330,5 +363,109 @@ class FootballController extends Controller
                 'goals_against' => $standing->away_goals_against,
             ],
         ];
+    }
+
+    /**
+     * Format match report for response.
+     */
+    protected function formatMatchReport(MatchResult $result): array
+    {
+        return [
+            'match' => $this->formatMatchResult($result),
+            'events' => $this->formatEvents($result->events ?? []),
+            'lineups' => $this->formatLineups($result->lineups ?? []),
+            'statistics' => $this->formatStatistics($result->statistics ?? []),
+        ];
+    }
+
+    /**
+     * Format match events.
+     */
+    protected function formatEvents(array $events): array
+    {
+        return collect($events)->map(function ($event) {
+            return [
+                'time' => [
+                    'elapsed' => $event['time']['elapsed'] ?? null,
+                    'extra' => $event['time']['extra'] ?? null,
+                ],
+                'team' => [
+                    'id' => $event['team']['id'] ?? null,
+                    'name' => $event['team']['name'] ?? null,
+                    'logo' => $event['team']['logo'] ?? null,
+                ],
+                'player' => [
+                    'id' => $event['player']['id'] ?? null,
+                    'name' => $event['player']['name'] ?? null,
+                ],
+                'assist' => [
+                    'id' => $event['assist']['id'] ?? null,
+                    'name' => $event['assist']['name'] ?? null,
+                ],
+                'type' => $event['type'] ?? null,
+                'detail' => $event['detail'] ?? null,
+                'comments' => $event['comments'] ?? null,
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Format match lineups.
+     */
+    protected function formatLineups(array $lineups): array
+    {
+        return collect($lineups)->map(function ($lineup) {
+            return [
+                'team' => [
+                    'id' => $lineup['team']['id'] ?? null,
+                    'name' => $lineup['team']['name'] ?? null,
+                    'logo' => $lineup['team']['logo'] ?? null,
+                    'colors' => $lineup['team']['colors'] ?? null,
+                ],
+                'formation' => $lineup['formation'] ?? null,
+                'coach' => [
+                    'id' => $lineup['coach']['id'] ?? null,
+                    'name' => $lineup['coach']['name'] ?? null,
+                    'photo' => $lineup['coach']['photo'] ?? null,
+                ],
+                'startXI' => collect($lineup['startXI'] ?? [])->map(function ($player) {
+                    return [
+                        'id' => $player['player']['id'] ?? null,
+                        'name' => $player['player']['name'] ?? null,
+                        'number' => $player['player']['number'] ?? null,
+                        'pos' => $player['player']['pos'] ?? null,
+                        'grid' => $player['player']['grid'] ?? null,
+                    ];
+                })->values()->all(),
+                'substitutes' => collect($lineup['substitutes'] ?? [])->map(function ($player) {
+                    return [
+                        'id' => $player['player']['id'] ?? null,
+                        'name' => $player['player']['name'] ?? null,
+                        'number' => $player['player']['number'] ?? null,
+                        'pos' => $player['player']['pos'] ?? null,
+                    ];
+                })->values()->all(),
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Format match statistics.
+     */
+    protected function formatStatistics(array $statistics): array
+    {
+        return collect($statistics)->map(function ($teamStats) {
+            return [
+                'team' => [
+                    'id' => $teamStats['team']['id'] ?? null,
+                    'name' => $teamStats['team']['name'] ?? null,
+                    'logo' => $teamStats['team']['logo'] ?? null,
+                ],
+                'statistics' => collect($teamStats['statistics'] ?? [])->mapWithKeys(function ($stat) {
+                    $type = strtolower(str_replace(' ', '_', $stat['type'] ?? ''));
+                    return [$type => $stat['value']];
+                })->all(),
+            ];
+        })->values()->all();
     }
 }

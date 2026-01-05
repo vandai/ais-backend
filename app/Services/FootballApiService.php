@@ -161,6 +161,48 @@ class FootballApiService
     }
 
     /**
+     * Get match events (goals, cards, substitutions) for a fixture.
+     */
+    public function getFixtureEvents(int $fixtureId): ?array
+    {
+        return $this->makeRequest('fixtures/events', [
+            'fixture' => $fixtureId,
+        ]);
+    }
+
+    /**
+     * Get match lineups for a fixture.
+     */
+    public function getFixtureLineups(int $fixtureId): ?array
+    {
+        return $this->makeRequest('fixtures/lineups', [
+            'fixture' => $fixtureId,
+        ]);
+    }
+
+    /**
+     * Get match statistics for a fixture.
+     */
+    public function getFixtureStatistics(int $fixtureId): ?array
+    {
+        return $this->makeRequest('fixtures/statistics', [
+            'fixture' => $fixtureId,
+        ]);
+    }
+
+    /**
+     * Get complete match details (events, lineups, statistics) for a fixture.
+     */
+    public function getMatchDetails(int $fixtureId): array
+    {
+        return [
+            'events' => $this->getFixtureEvents($fixtureId),
+            'lineups' => $this->getFixtureLineups($fixtureId),
+            'statistics' => $this->getFixtureStatistics($fixtureId),
+        ];
+    }
+
+    /**
      * Get live fixtures for the team.
      */
     public function getLiveFixtures(): ?array

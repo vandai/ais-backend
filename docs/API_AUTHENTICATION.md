@@ -1459,7 +1459,7 @@ Accept: application/json
 
 ### 23. Get Match Report
 
-Get detailed match report including events, lineups, and statistics.
+Get detailed match report including events (goals, cards, substitutions), lineups (formations, starting XI, substitutes), and match statistics (possession, shots, passes, etc.).
 
 **Endpoint:** `GET /api/football/results/{fixture_id}/report`
 
@@ -1469,7 +1469,7 @@ Get detailed match report including events, lineups, and statistics.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `fixture_id` | integer | Yes | The fixture ID from the match result |
+| `fixture_id` | integer | Yes | The fixture ID from the match result (obtained from `/api/football/results` endpoint) |
 
 **Request:**
 ```http
@@ -1481,205 +1481,633 @@ Accept: application/json
 **Success Response:**
 - Status: `200 OK`
 
+The response contains four main sections: `match`, `events`, `lineups`, and `statistics`.
+
 ```json
 {
   "data": {
-    "match": {
-      "id": 1234566,
-      "date": "2026-01-10T20:00:00+00:00",
-      "venue": {
-        "name": "Emirates Stadium",
-        "city": "London"
-      },
-      "league": {
-        "id": 39,
-        "name": "Premier League",
-        "round": "Regular Season - 20",
-        "logo": "https://media.api-sports.io/football/leagues/39.png"
-      },
-      "home": {
-        "id": 42,
-        "name": "Arsenal",
-        "logo": "https://media.api-sports.io/football/teams/42.png",
-        "goals": 3
-      },
-      "away": {
-        "id": 40,
-        "name": "Liverpool",
-        "logo": "https://media.api-sports.io/football/teams/40.png",
-        "goals": 1
-      },
-      "score": {
-        "home": 3,
-        "away": 1,
-        "display": "3 - 1",
-        "halftime": {
-          "home": 1,
-          "away": 0
-        }
-      },
-      "arsenal": {
-        "is_home": true,
-        "opponent": "Liverpool",
-        "opponent_logo": "https://media.api-sports.io/football/teams/40.png",
-        "venue_type": "H",
-        "goals_for": 3,
-        "goals_against": 1,
-        "result": "W"
-      }
-    },
-    "events": [
-      {
-        "time": {
-          "elapsed": 23,
-          "extra": null
-        },
-        "team": {
-          "id": 42,
-          "name": "Arsenal",
-          "logo": "https://media.api-sports.io/football/teams/42.png"
-        },
-        "player": {
-          "id": 1234,
-          "name": "B. Saka"
-        },
-        "assist": {
-          "id": 5678,
-          "name": "M. Odegaard"
-        },
-        "type": "Goal",
-        "detail": "Normal Goal",
-        "comments": null
-      },
-      {
-        "time": {
-          "elapsed": 45,
-          "extra": 2
-        },
-        "team": {
-          "id": 40,
-          "name": "Liverpool",
-          "logo": "https://media.api-sports.io/football/teams/40.png"
-        },
-        "player": {
-          "id": 9876,
-          "name": "M. Salah"
-        },
-        "assist": {
-          "id": null,
-          "name": null
-        },
-        "type": "Card",
-        "detail": "Yellow Card",
-        "comments": "Foul"
-      }
-    ],
-    "lineups": [
-      {
-        "team": {
-          "id": 42,
-          "name": "Arsenal",
-          "logo": "https://media.api-sports.io/football/teams/42.png",
-          "colors": {
-            "player": {
-              "primary": "ff0000",
-              "number": "ffffff",
-              "border": "ff0000"
-            },
-            "goalkeeper": {
-              "primary": "000000",
-              "number": "ffffff",
-              "border": "000000"
-            }
-          }
-        },
-        "formation": "4-3-3",
-        "coach": {
-          "id": 123,
-          "name": "M. Arteta",
-          "photo": "https://media.api-sports.io/football/coachs/123.png"
-        },
-        "startXI": [
-          {
-            "id": 100,
-            "name": "D. Raya",
-            "number": 22,
-            "pos": "G",
-            "grid": "1:1"
-          },
-          {
-            "id": 101,
-            "name": "B. White",
-            "number": 4,
-            "pos": "D",
-            "grid": "2:4"
-          }
-        ],
-        "substitutes": [
-          {
-            "id": 200,
-            "name": "K. Havertz",
-            "number": 29,
-            "pos": "F"
-          }
-        ]
-      }
-    ],
-    "statistics": [
-      {
-        "team": {
-          "id": 42,
-          "name": "Arsenal",
-          "logo": "https://media.api-sports.io/football/teams/42.png"
-        },
-        "statistics": {
-          "shots_on_goal": 8,
-          "shots_off_goal": 5,
-          "total_shots": 15,
-          "blocked_shots": 2,
-          "shots_insidebox": 10,
-          "shots_outsidebox": 5,
-          "fouls": 12,
-          "corner_kicks": 7,
-          "offsides": 2,
-          "ball_possession": "62%",
-          "yellow_cards": 1,
-          "red_cards": 0,
-          "goalkeeper_saves": 3,
-          "total_passes": 542,
-          "passes_accurate": 478,
-          "passes_%": "88%"
-        }
-      },
-      {
-        "team": {
-          "id": 40,
-          "name": "Liverpool",
-          "logo": "https://media.api-sports.io/football/teams/40.png"
-        },
-        "statistics": {
-          "shots_on_goal": 4,
-          "shots_off_goal": 3,
-          "total_shots": 9,
-          "blocked_shots": 2,
-          "shots_insidebox": 5,
-          "shots_outsidebox": 4,
-          "fouls": 15,
-          "corner_kicks": 4,
-          "offsides": 1,
-          "ball_possession": "38%",
-          "yellow_cards": 2,
-          "red_cards": 0,
-          "goalkeeper_saves": 5,
-          "total_passes": 328,
-          "passes_accurate": 267,
-          "passes_%": "81%"
-        }
-      }
-    ]
+    "match": { ... },
+    "events": [ ... ],
+    "lineups": [ ... ],
+    "statistics": [ ... ]
   }
 }
 ```
+
+---
+
+#### Response Section: `match`
+
+Basic match information including teams, score, and venue.
+
+```json
+{
+  "match": {
+    "id": 1234566,
+    "date": "2026-01-10T20:00:00+00:00",
+    "venue": {
+      "name": "Emirates Stadium",
+      "city": "London"
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "round": "Regular Season - 20",
+      "logo": "https://media.api-sports.io/football/leagues/39.png"
+    },
+    "home": {
+      "id": 42,
+      "name": "Arsenal",
+      "logo": "https://media.api-sports.io/football/teams/42.png",
+      "goals": 3
+    },
+    "away": {
+      "id": 40,
+      "name": "Liverpool",
+      "logo": "https://media.api-sports.io/football/teams/40.png",
+      "goals": 1
+    },
+    "score": {
+      "home": 3,
+      "away": 1,
+      "display": "3 - 1",
+      "halftime": {
+        "home": 1,
+        "away": 0
+      }
+    },
+    "arsenal": {
+      "is_home": true,
+      "opponent": "Liverpool",
+      "opponent_logo": "https://media.api-sports.io/football/teams/40.png",
+      "venue_type": "H",
+      "goals_for": 3,
+      "goals_against": 1,
+      "result": "W"
+    }
+  }
+}
+```
+
+---
+
+#### Response Section: `events`
+
+Array of match events in chronological order. Events include goals, cards, substitutions, and VAR decisions.
+
+**Event Object Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `time.elapsed` | integer | Minute when the event occurred (1-90+) |
+| `time.extra` | integer\|null | Extra/injury time minutes (e.g., 45+2 = elapsed:45, extra:2) |
+| `team.id` | integer | Team ID that the event belongs to |
+| `team.name` | string | Team name |
+| `team.logo` | string | Team logo URL |
+| `player.id` | integer | Player ID who performed the action |
+| `player.name` | string | Player name |
+| `assist.id` | integer\|null | Assisting player ID (for goals) |
+| `assist.name` | string\|null | Assisting player name |
+| `type` | string | Event type: `Goal`, `Card`, `subst`, `Var` |
+| `detail` | string | Event detail (see table below) |
+| `comments` | string\|null | Additional comments |
+
+**Event Types and Details:**
+
+| Type | Possible Details | Description |
+|------|------------------|-------------|
+| `Goal` | `Normal Goal`, `Own Goal`, `Penalty`, `Missed Penalty` | Goal scored or penalty |
+| `Card` | `Yellow Card`, `Red Card`, `Second Yellow card` | Card shown to player |
+| `subst` | `Substitution 1`, `Substitution 2`, etc. | Player substitution (player = out, assist = in) |
+| `Var` | `Goal cancelled`, `Penalty confirmed`, etc. | VAR decision |
+
+**Example Events Array:**
+
+```json
+{
+  "events": [
+    {
+      "time": { "elapsed": 23, "extra": null },
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "player": { "id": 1234, "name": "B. Saka" },
+      "assist": { "id": 5678, "name": "M. Odegaard" },
+      "type": "Goal",
+      "detail": "Normal Goal",
+      "comments": null
+    },
+    {
+      "time": { "elapsed": 45, "extra": 2 },
+      "team": {
+        "id": 40,
+        "name": "Liverpool",
+        "logo": "https://media.api-sports.io/football/teams/40.png"
+      },
+      "player": { "id": 9876, "name": "M. Salah" },
+      "assist": { "id": null, "name": null },
+      "type": "Card",
+      "detail": "Yellow Card",
+      "comments": "Foul"
+    },
+    {
+      "time": { "elapsed": 65, "extra": null },
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "player": { "id": 1111, "name": "G. Jesus" },
+      "assist": { "id": 2222, "name": "K. Havertz" },
+      "type": "subst",
+      "detail": "Substitution 1",
+      "comments": null
+    },
+    {
+      "time": { "elapsed": 78, "extra": null },
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "player": { "id": 2222, "name": "K. Havertz" },
+      "assist": { "id": 1234, "name": "B. Saka" },
+      "type": "Goal",
+      "detail": "Normal Goal",
+      "comments": null
+    },
+    {
+      "time": { "elapsed": 90, "extra": 3 },
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "player": { "id": 3333, "name": "M. Odegaard" },
+      "assist": { "id": null, "name": null },
+      "type": "Goal",
+      "detail": "Penalty",
+      "comments": null
+    }
+  ]
+}
+```
+
+**Frontend Usage - Display Match Timeline:**
+
+```typescript
+// TypeScript interfaces
+interface MatchEvent {
+  time: { elapsed: number; extra: number | null };
+  team: { id: number; name: string; logo: string };
+  player: { id: number; name: string };
+  assist: { id: number | null; name: string | null };
+  type: 'Goal' | 'Card' | 'subst' | 'Var';
+  detail: string;
+  comments: string | null;
+}
+
+// Filter goals only
+const goals = events.filter(e => e.type === 'Goal');
+
+// Get Arsenal goals
+const arsenalGoals = events.filter(e => e.type === 'Goal' && e.team.id === 42);
+
+// Format time display
+const formatTime = (event: MatchEvent) => {
+  if (event.time.extra) {
+    return `${event.time.elapsed}+${event.time.extra}'`;
+  }
+  return `${event.time.elapsed}'`;
+};
+
+// Build goal scorers string: "Saka 23', Havertz 78', Odegaard 90+3' (pen)"
+const goalScorers = goals
+  .filter(g => g.team.id === 42)
+  .map(g => {
+    const time = formatTime(g);
+    const pen = g.detail === 'Penalty' ? ' (pen)' : '';
+    return `${g.player.name} ${time}${pen}`;
+  })
+  .join(', ');
+```
+
+---
+
+#### Response Section: `lineups`
+
+Array containing lineup information for both teams (home team first, away team second).
+
+**Lineup Object Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `team.id` | integer | Team ID |
+| `team.name` | string | Team name |
+| `team.logo` | string | Team logo URL |
+| `team.colors` | object | Kit colors for rendering |
+| `formation` | string | Team formation (e.g., "4-3-3", "4-2-3-1") |
+| `coach.id` | integer | Coach ID |
+| `coach.name` | string | Coach name |
+| `coach.photo` | string | Coach photo URL |
+| `startXI` | array | Array of 11 starting players |
+| `substitutes` | array | Array of substitute players |
+
+**Player Object Fields (startXI):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | integer | Player ID |
+| `name` | string | Player name |
+| `number` | integer | Shirt number |
+| `pos` | string | Position: `G` (Goalkeeper), `D` (Defender), `M` (Midfielder), `F` (Forward) |
+| `grid` | string | Position on pitch grid (e.g., "1:1" for GK, "2:4" for right-back) |
+
+**Grid System Explained:**
+
+The `grid` field uses format `"row:column"` to position players on the pitch:
+- Row 1 = Goalkeeper line
+- Row 2 = Defenders line
+- Row 3 = Midfielders line (or defensive midfield)
+- Row 4 = Attacking midfield / Wingers
+- Row 5 = Forwards line
+- Columns are numbered left to right (1-5)
+
+Example for 4-3-3 formation:
+```
+          GK (1:1)
+RB(2:4) CB(2:3) CB(2:2) LB(2:1)
+    CM(3:3) CM(3:2) CM(3:1)
+  RW(4:3)   ST(4:2)   LW(4:1)
+```
+
+**Example Lineups Array:**
+
+```json
+{
+  "lineups": [
+    {
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png",
+        "colors": {
+          "player": { "primary": "ff0000", "number": "ffffff", "border": "ff0000" },
+          "goalkeeper": { "primary": "00ff00", "number": "000000", "border": "00ff00" }
+        }
+      },
+      "formation": "4-3-3",
+      "coach": {
+        "id": 123,
+        "name": "M. Arteta",
+        "photo": "https://media.api-sports.io/football/coachs/123.png"
+      },
+      "startXI": [
+        { "id": 100, "name": "D. Raya", "number": 22, "pos": "G", "grid": "1:1" },
+        { "id": 101, "name": "B. White", "number": 4, "pos": "D", "grid": "2:4" },
+        { "id": 102, "name": "W. Saliba", "number": 2, "pos": "D", "grid": "2:3" },
+        { "id": 103, "name": "G. Magalhaes", "number": 6, "pos": "D", "grid": "2:2" },
+        { "id": 104, "name": "J. Timber", "number": 12, "pos": "D", "grid": "2:1" },
+        { "id": 105, "name": "T. Partey", "number": 5, "pos": "M", "grid": "3:2" },
+        { "id": 106, "name": "M. Odegaard", "number": 8, "pos": "M", "grid": "3:3" },
+        { "id": 107, "name": "D. Rice", "number": 41, "pos": "M", "grid": "3:1" },
+        { "id": 108, "name": "B. Saka", "number": 7, "pos": "F", "grid": "4:3" },
+        { "id": 109, "name": "G. Martinelli", "number": 11, "pos": "F", "grid": "4:1" },
+        { "id": 110, "name": "K. Havertz", "number": 29, "pos": "F", "grid": "4:2" }
+      ],
+      "substitutes": [
+        { "id": 200, "name": "N. Ramsdale", "number": 1, "pos": "G" },
+        { "id": 201, "name": "K. Tierney", "number": 3, "pos": "D" },
+        { "id": 202, "name": "G. Jesus", "number": 9, "pos": "F" },
+        { "id": 203, "name": "L. Trossard", "number": 19, "pos": "F" },
+        { "id": 204, "name": "J. Zinchenko", "number": 35, "pos": "D" },
+        { "id": 205, "name": "F. Vieira", "number": 21, "pos": "M" },
+        { "id": 206, "name": "E. Nketiah", "number": 14, "pos": "F" }
+      ]
+    },
+    {
+      "team": {
+        "id": 40,
+        "name": "Liverpool",
+        "logo": "https://media.api-sports.io/football/teams/40.png",
+        "colors": {
+          "player": { "primary": "ff0000", "number": "ffffff", "border": "ff0000" },
+          "goalkeeper": { "primary": "000000", "number": "ffffff", "border": "000000" }
+        }
+      },
+      "formation": "4-3-3",
+      "coach": {
+        "id": 456,
+        "name": "A. Slot",
+        "photo": "https://media.api-sports.io/football/coachs/456.png"
+      },
+      "startXI": [
+        { "id": 300, "name": "Alisson", "number": 1, "pos": "G", "grid": "1:1" },
+        { "id": 301, "name": "T. Alexander-Arnold", "number": 66, "pos": "D", "grid": "2:4" },
+        { "id": 302, "name": "I. Konate", "number": 5, "pos": "D", "grid": "2:3" },
+        { "id": 303, "name": "V. van Dijk", "number": 4, "pos": "D", "grid": "2:2" },
+        { "id": 304, "name": "A. Robertson", "number": 26, "pos": "D", "grid": "2:1" },
+        { "id": 305, "name": "A. Mac Allister", "number": 10, "pos": "M", "grid": "3:2" },
+        { "id": 306, "name": "D. Szoboszlai", "number": 8, "pos": "M", "grid": "3:3" },
+        { "id": 307, "name": "R. Gravenberch", "number": 38, "pos": "M", "grid": "3:1" },
+        { "id": 308, "name": "M. Salah", "number": 11, "pos": "F", "grid": "4:3" },
+        { "id": 309, "name": "L. Diaz", "number": 7, "pos": "F", "grid": "4:1" },
+        { "id": 310, "name": "D. Nunez", "number": 9, "pos": "F", "grid": "4:2" }
+      ],
+      "substitutes": [
+        { "id": 400, "name": "C. Kelleher", "number": 62, "pos": "G" },
+        { "id": 401, "name": "J. Gomez", "number": 2, "pos": "D" },
+        { "id": 402, "name": "C. Gakpo", "number": 18, "pos": "F" },
+        { "id": 403, "name": "W. Endo", "number": 3, "pos": "M" },
+        { "id": 404, "name": "D. Jota", "number": 20, "pos": "F" }
+      ]
+    }
+  ]
+}
+```
+
+**Frontend Usage - Render Formation:**
+
+```typescript
+// TypeScript interfaces
+interface Player {
+  id: number;
+  name: string;
+  number: number;
+  pos: string;
+  grid?: string;
+}
+
+interface Lineup {
+  team: { id: number; name: string; logo: string; colors: any };
+  formation: string;
+  coach: { id: number; name: string; photo: string };
+  startXI: Player[];
+  substitutes: Player[];
+}
+
+// Get Arsenal lineup (first element is home team)
+const arsenalLineup = lineups.find(l => l.team.id === 42);
+
+// Group players by position
+const groupByPosition = (players: Player[]) => ({
+  goalkeeper: players.filter(p => p.pos === 'G'),
+  defenders: players.filter(p => p.pos === 'D'),
+  midfielders: players.filter(p => p.pos === 'M'),
+  forwards: players.filter(p => p.pos === 'F'),
+});
+
+// Parse grid position for CSS positioning
+const parseGrid = (grid: string) => {
+  const [row, col] = grid.split(':').map(Number);
+  return { row, col };
+};
+
+// Calculate player position on pitch (percentage-based)
+const getPlayerPosition = (grid: string, formation: string) => {
+  const { row, col } = parseGrid(grid);
+  const totalRows = 5;
+  const totalCols = 5;
+
+  return {
+    top: `${(row / totalRows) * 100}%`,
+    left: `${(col / totalCols) * 100}%`,
+  };
+};
+```
+
+---
+
+#### Response Section: `statistics`
+
+Array containing match statistics for both teams. Statistics are provided as key-value pairs.
+
+**Statistics Object Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `team.id` | integer | Team ID |
+| `team.name` | string | Team name |
+| `team.logo` | string | Team logo URL |
+| `statistics` | object | Key-value pairs of statistics |
+
+**Available Statistics Keys:**
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `shots_on_goal` | integer | Shots on target |
+| `shots_off_goal` | integer | Shots off target |
+| `total_shots` | integer | Total shots attempted |
+| `blocked_shots` | integer | Shots blocked by defenders |
+| `shots_insidebox` | integer | Shots from inside the box |
+| `shots_outsidebox` | integer | Shots from outside the box |
+| `fouls` | integer | Fouls committed |
+| `corner_kicks` | integer | Corner kicks taken |
+| `offsides` | integer | Offsides called |
+| `ball_possession` | string | Ball possession percentage (e.g., "62%") |
+| `yellow_cards` | integer | Yellow cards received |
+| `red_cards` | integer | Red cards received |
+| `goalkeeper_saves` | integer | Saves made by goalkeeper |
+| `total_passes` | integer | Total passes attempted |
+| `passes_accurate` | integer | Accurate passes completed |
+| `passes_%` | string | Pass accuracy percentage (e.g., "88%") |
+| `expected_goals` | string\|null | Expected goals (xG) if available |
+
+**Example Statistics Array:**
+
+```json
+{
+  "statistics": [
+    {
+      "team": {
+        "id": 42,
+        "name": "Arsenal",
+        "logo": "https://media.api-sports.io/football/teams/42.png"
+      },
+      "statistics": {
+        "shots_on_goal": 8,
+        "shots_off_goal": 5,
+        "total_shots": 15,
+        "blocked_shots": 2,
+        "shots_insidebox": 10,
+        "shots_outsidebox": 5,
+        "fouls": 12,
+        "corner_kicks": 7,
+        "offsides": 2,
+        "ball_possession": "62%",
+        "yellow_cards": 1,
+        "red_cards": 0,
+        "goalkeeper_saves": 3,
+        "total_passes": 542,
+        "passes_accurate": 478,
+        "passes_%": "88%",
+        "expected_goals": "2.45"
+      }
+    },
+    {
+      "team": {
+        "id": 40,
+        "name": "Liverpool",
+        "logo": "https://media.api-sports.io/football/teams/40.png"
+      },
+      "statistics": {
+        "shots_on_goal": 4,
+        "shots_off_goal": 3,
+        "total_shots": 9,
+        "blocked_shots": 2,
+        "shots_insidebox": 5,
+        "shots_outsidebox": 4,
+        "fouls": 15,
+        "corner_kicks": 4,
+        "offsides": 1,
+        "ball_possession": "38%",
+        "yellow_cards": 2,
+        "red_cards": 0,
+        "goalkeeper_saves": 5,
+        "total_passes": 328,
+        "passes_accurate": 267,
+        "passes_%": "81%",
+        "expected_goals": "0.89"
+      }
+    }
+  ]
+}
+```
+
+**Frontend Usage - Display Statistics Comparison:**
+
+```typescript
+// TypeScript interfaces
+interface TeamStatistics {
+  team: { id: number; name: string; logo: string };
+  statistics: Record<string, number | string>;
+}
+
+// Get statistics for comparison display
+const [homeStats, awayStats] = statistics;
+
+// Build comparison data
+const statLabels: Record<string, string> = {
+  ball_possession: 'Possession',
+  total_shots: 'Total Shots',
+  shots_on_goal: 'Shots on Target',
+  corner_kicks: 'Corners',
+  fouls: 'Fouls',
+  yellow_cards: 'Yellow Cards',
+  passes_accurate: 'Accurate Passes',
+  'passes_%': 'Pass Accuracy',
+};
+
+const comparisonData = Object.entries(statLabels).map(([key, label]) => ({
+  label,
+  home: homeStats.statistics[key],
+  away: awayStats.statistics[key],
+}));
+
+// Parse percentage for bar width calculation
+const parsePercentage = (value: string | number): number => {
+  if (typeof value === 'string' && value.includes('%')) {
+    return parseInt(value.replace('%', ''));
+  }
+  return typeof value === 'number' ? value : 0;
+};
+
+// Example React component
+const StatBar = ({ label, home, away }: { label: string; home: any; away: any }) => {
+  const homeNum = parsePercentage(home);
+  const awayNum = parsePercentage(away);
+  const total = homeNum + awayNum || 1;
+
+  return (
+    <div className="stat-row">
+      <span className="home-value">{home}</span>
+      <div className="bar-container">
+        <div className="home-bar" style={{ width: `${(homeNum / total) * 100}%` }} />
+        <div className="away-bar" style={{ width: `${(awayNum / total) * 100}%` }} />
+      </div>
+      <span className="label">{label}</span>
+      <span className="away-value">{away}</span>
+    </div>
+  );
+};
+```
+
+---
+
+#### Complete Frontend Example (Next.js)
+
+```typescript
+// app/match/[fixtureId]/page.tsx
+import { useEffect, useState } from 'react';
+
+interface MatchReport {
+  match: Match;
+  events: MatchEvent[];
+  lineups: Lineup[];
+  statistics: TeamStatistics[];
+}
+
+export default function MatchReportPage({ params }: { params: { fixtureId: string } }) {
+  const [report, setReport] = useState<MatchReport | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`http://localhost:8000/api/football/results/${params.fixtureId}/report`)
+      .then(res => res.json())
+      .then(data => {
+        setReport(data.data);
+        setLoading(false);
+      });
+  }, [params.fixtureId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!report) return <div>Match not found</div>;
+
+  const { match, events, lineups, statistics } = report;
+
+  return (
+    <div className="match-report">
+      {/* Match Header */}
+      <div className="match-header">
+        <TeamLogo team={match.home} />
+        <div className="score">{match.score.display}</div>
+        <TeamLogo team={match.away} />
+      </div>
+
+      {/* Match Timeline */}
+      <div className="timeline">
+        <h3>Match Events</h3>
+        {events.map((event, i) => (
+          <EventItem key={i} event={event} />
+        ))}
+      </div>
+
+      {/* Lineups */}
+      <div className="lineups">
+        <h3>Lineups</h3>
+        <div className="formations">
+          {lineups.map((lineup, i) => (
+            <FormationView key={i} lineup={lineup} />
+          ))}
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="statistics">
+        <h3>Match Statistics</h3>
+        <StatisticsComparison
+          home={statistics[0]}
+          away={statistics[1]}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+---
 
 **Not Found Response:**
 - Status: `404 Not Found`
@@ -1690,15 +2118,6 @@ Accept: application/json
   "message": "Match not found"
 }
 ```
-
-**Event Types:**
-
-| Type | Description |
-|------|-------------|
-| `Goal` | Goal scored (detail: Normal Goal, Own Goal, Penalty) |
-| `Card` | Card shown (detail: Yellow Card, Red Card) |
-| `subst` | Substitution made |
-| `Var` | VAR decision |
 
 ---
 

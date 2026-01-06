@@ -1,0 +1,150 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Fixture;
+use Illuminate\Database\Seeder;
+
+class FixtureSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $fixtures = [
+            [
+                'fixture_id' => 1379169,
+                'referee' => null,
+                'timezone' => 'UTC',
+                'match_date' => '2026-01-08 20:00:00',
+                'timestamp' => 1767902400,
+                'venue_id' => 494,
+                'venue_name' => 'Emirates Stadium',
+                'venue_city' => 'London',
+                'league_id' => 39,
+                'league_name' => 'Premier League',
+                'league_country' => 'England',
+                'league_logo' => 'https://media.api-sports.io/football/leagues/39.png',
+                'league_round' => 'Regular Season - 21',
+                'season' => 2025,
+                'home_team_id' => 42,
+                'home_team_name' => 'Arsenal',
+                'home_team_logo' => 'https://media.api-sports.io/football/teams/42.png',
+                'away_team_id' => 40,
+                'away_team_name' => 'Liverpool',
+                'away_team_logo' => 'https://media.api-sports.io/football/teams/40.png',
+                'status_long' => 'Not Started',
+                'status_short' => 'NS',
+                'status_elapsed' => null,
+            ],
+            [
+                'fixture_id' => 1490810,
+                'referee' => null,
+                'timezone' => 'UTC',
+                'match_date' => '2026-01-11 14:00:00',
+                'timestamp' => 1768140000,
+                'venue_id' => 573,
+                'venue_name' => 'Fratton Park',
+                'venue_city' => 'Portsmouth',
+                'league_id' => 45,
+                'league_name' => 'FA Cup',
+                'league_country' => 'England',
+                'league_logo' => 'https://media.api-sports.io/football/leagues/45.png',
+                'league_round' => 'Round of 64',
+                'season' => 2025,
+                'home_team_id' => 1355,
+                'home_team_name' => 'Portsmouth',
+                'home_team_logo' => 'https://media.api-sports.io/football/teams/1355.png',
+                'away_team_id' => 42,
+                'away_team_name' => 'Arsenal',
+                'away_team_logo' => 'https://media.api-sports.io/football/teams/42.png',
+                'status_long' => 'Not Started',
+                'status_short' => 'NS',
+                'status_elapsed' => null,
+            ],
+            [
+                'fixture_id' => 1498259,
+                'referee' => null,
+                'timezone' => 'UTC',
+                'match_date' => '2026-01-14 20:00:00',
+                'timestamp' => 1768420800,
+                'venue_id' => 519,
+                'venue_name' => 'Stamford Bridge',
+                'venue_city' => 'London',
+                'league_id' => 48,
+                'league_name' => 'League Cup',
+                'league_country' => 'England',
+                'league_logo' => 'https://media.api-sports.io/football/leagues/48.png',
+                'league_round' => 'Semi-finals',
+                'season' => 2025,
+                'home_team_id' => 49,
+                'home_team_name' => 'Chelsea',
+                'home_team_logo' => 'https://media.api-sports.io/football/teams/49.png',
+                'away_team_id' => 42,
+                'away_team_name' => 'Arsenal',
+                'away_team_logo' => 'https://media.api-sports.io/football/teams/42.png',
+                'status_long' => 'Not Started',
+                'status_short' => 'NS',
+                'status_elapsed' => null,
+            ],
+            [
+                'fixture_id' => 1379185,
+                'referee' => null,
+                'timezone' => 'UTC',
+                'match_date' => '2026-01-17 17:30:00',
+                'timestamp' => 1768671000,
+                'venue_id' => 566,
+                'venue_name' => 'City Ground',
+                'venue_city' => 'Nottingham',
+                'league_id' => 39,
+                'league_name' => 'Premier League',
+                'league_country' => 'England',
+                'league_logo' => 'https://media.api-sports.io/football/leagues/39.png',
+                'league_round' => 'Regular Season - 22',
+                'season' => 2025,
+                'home_team_id' => 65,
+                'home_team_name' => 'Nottingham Forest',
+                'home_team_logo' => 'https://media.api-sports.io/football/teams/65.png',
+                'away_team_id' => 42,
+                'away_team_name' => 'Arsenal',
+                'away_team_logo' => 'https://media.api-sports.io/football/teams/42.png',
+                'status_long' => 'Not Started',
+                'status_short' => 'NS',
+                'status_elapsed' => null,
+            ],
+            [
+                'fixture_id' => 1451136,
+                'referee' => null,
+                'timezone' => 'UTC',
+                'match_date' => '2026-01-20 20:00:00',
+                'timestamp' => 1768939200,
+                'venue_id' => 907,
+                'venue_name' => 'Stadio Giuseppe Meazza',
+                'venue_city' => 'Milan',
+                'league_id' => 2,
+                'league_name' => 'UEFA Champions League',
+                'league_country' => 'World',
+                'league_logo' => 'https://media.api-sports.io/football/leagues/2.png',
+                'league_round' => 'League Stage - 7',
+                'season' => 2025,
+                'home_team_id' => 505,
+                'home_team_name' => 'Inter',
+                'home_team_logo' => 'https://media.api-sports.io/football/teams/505.png',
+                'away_team_id' => 42,
+                'away_team_name' => 'Arsenal',
+                'away_team_logo' => 'https://media.api-sports.io/football/teams/42.png',
+                'status_long' => 'Not Started',
+                'status_short' => 'NS',
+                'status_elapsed' => null,
+            ],
+        ];
+
+        foreach ($fixtures as $fixture) {
+            Fixture::updateOrCreate(
+                ['fixture_id' => $fixture['fixture_id']],
+                $fixture
+            );
+        }
+    }
+}

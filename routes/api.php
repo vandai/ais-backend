@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\EventCategoryController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FootballController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\ProfileController;
@@ -33,8 +35,17 @@ Route::get('/news/{news_id}', [NewsController::class, 'show']);
 // Categories endpoints (public)
 Route::get('/categories', [CategoryController::class, 'index']);
 
+// Events endpoints (public)
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{event_id}', [EventController::class, 'show']);
+Route::get('/event-categories', [EventCategoryController::class, 'index']);
+
+// Profile endpoints (public)
+Route::get('/profile/member/{member_number}', [ProfileController::class, 'getByMemberNumber']);
+
 // Football endpoints (public)
 Route::prefix('football')->group(function () {
+    Route::get('/seasons', [FootballController::class, 'seasons']);
     Route::get('/competitions', [FootballController::class, 'competitions']);
     Route::get('/fixtures', [FootballController::class, 'fixtures']);
     Route::get('/fixtures/next', [FootballController::class, 'nextFixture']);
@@ -59,7 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Profile endpoints
     Route::get('/profile/user/{user_id}', [ProfileController::class, 'getByUserId']);
-    Route::get('/profile/member/{member_number}', [ProfileController::class, 'getByMemberNumber']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::delete('/profile/picture', [ProfileController::class, 'deleteProfilePicture']);
 });

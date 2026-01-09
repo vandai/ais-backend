@@ -91,7 +91,7 @@ class Event extends Model
     {
         return Attribute::make(
             get: fn () => $this->image
-                ? url(Storage::url('events/' . $this->image))
+                ? url(Storage::url($this->image))
                 : null,
         );
     }

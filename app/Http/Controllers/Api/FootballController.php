@@ -78,26 +78,49 @@ class FootballController extends Controller
     }
 
     /**
-     * Get upcoming fixtures.
+     * Get upcoming fixtures with pagination and venue filter.
      */
     public function fixtures(Request $request): JsonResponse
     {
-        $limit = $request->input('limit', 5);
+        $perPage = $request->input('per_page', 10);
         $season = $request->input('season');
+        $venue = $request->input('venue', 'all'); // all, home, away
 
-        $query = Fixture::upcoming();
+        $query = Fixture::where('match_date', '>', now())
+            ->orderBy('match_date', 'asc');
+
+        // Apply venue filter
+        if ($venue === 'home') {
+            $query->homeMatches();
+        } elseif ($venue === 'away') {
+            $query->awayMatches();
+        } else {
+            $query->forTeam();
+        }
 
         if ($season) {
             $query->season($season);
         }
 
-        $fixtures = $query->limit($limit)->get();
+        $fixtures = $query->paginate($perPage);
 
         return response()->json([
-            'data' => $fixtures->map(fn ($fixture) => $this->formatFixture($fixture)),
+            'data' => $fixtures->getCollection()->map(fn ($fixture) => $this->formatFixture($fixture)),
             'meta' => [
-                'total' => $fixtures->count(),
+                'current_page' => $fixtures->currentPage(),
+                'per_page' => $fixtures->perPage(),
+                'total' => $fixtures->total(),
+                'last_page' => $fixtures->lastPage(),
+                'from' => $fixtures->firstItem(),
+                'to' => $fixtures->lastItem(),
                 'season' => $season ?? $this->footballApi->getCurrentSeason(),
+                'venue_filter' => $venue,
+            ],
+            'links' => [
+                'first' => $fixtures->url(1),
+                'last' => $fixtures->url($fixtures->lastPage()),
+                'prev' => $fixtures->previousPageUrl(),
+                'next' => $fixtures->nextPageUrl(),
             ],
         ]);
     }
@@ -587,6 +610,39 @@ class FootballController extends Controller
                 })->all(),
             ];
         })->values()->all();
+    }
+
+    /**
+     * Get list of available seasons.
+     */
+    public function seasons(): JsonResponse
+    {
+        $seasons = Competition::select('season')
+            ->distinct()
+            ->orderBy('season', 'desc')
+            ->pluck('season');
+
+        // Add additional info for each season
+        $seasonsData = $seasons->map(function ($season) {
+            $competitions = Competition::season($season)->count();
+            $matches = MatchResult::season($season)->count();
+
+            return [
+                'year' => $season,
+                'label' => $season . '/' . ($season + 1),
+                'competitions_count' => $competitions,
+                'matches_count' => $matches,
+                'is_current' => $season === $this->footballApi->getCurrentSeason(),
+            ];
+        });
+
+        return response()->json([
+            'data' => $seasonsData,
+            'meta' => [
+                'total' => $seasons->count(),
+                'current_season' => $this->footballApi->getCurrentSeason(),
+            ],
+        ]);
     }
 
     /**

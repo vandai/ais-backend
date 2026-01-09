@@ -1560,7 +1560,7 @@ const CompetitionFilter = () => {
 
 ### 23. Get Upcoming Fixtures
 
-Get Arsenal's upcoming matches.
+Get Arsenal's upcoming matches with pagination and venue filtering.
 
 **Endpoint:** `GET /api/football/fixtures`
 
@@ -1570,12 +1570,30 @@ Get Arsenal's upcoming matches.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
-| `limit` | integer | No | 5 | Number of fixtures to return |
+| `per_page` | integer | No | 10 | Number of fixtures per page |
+| `page` | integer | No | 1 | Page number |
 | `season` | integer | No | current | Season year (e.g., 2025) |
+| `venue` | string | No | all | Filter by venue: `all`, `home`, `away` |
 
-**Request:**
+**Request Examples:**
+
+Get all upcoming fixtures (paginated):
 ```http
-GET /api/football/fixtures?limit=5 HTTP/1.1
+GET /api/football/fixtures HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+Get home matches only:
+```http
+GET /api/football/fixtures?venue=home HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+```
+
+Get away matches only:
+```http
+GET /api/football/fixtures?venue=away&per_page=5 HTTP/1.1
 Host: localhost:8000
 Accept: application/json
 ```
@@ -1623,10 +1641,48 @@ Accept: application/json
     }
   ],
   "meta": {
-    "total": 5,
-    "season": 2025
+    "current_page": 1,
+    "per_page": 10,
+    "total": 15,
+    "last_page": 2,
+    "from": 1,
+    "to": 10,
+    "season": 2025,
+    "venue_filter": "all"
+  },
+  "links": {
+    "first": "http://localhost:8000/api/football/fixtures?page=1",
+    "last": "http://localhost:8000/api/football/fixtures?page=2",
+    "prev": null,
+    "next": "http://localhost:8000/api/football/fixtures?page=2"
   }
 }
+```
+
+**Venue Filter Values:**
+
+| Value | Description |
+|-------|-------------|
+| `all` | All upcoming fixtures (home and away) - default |
+| `home` | Only home matches at Emirates Stadium |
+| `away` | Only away matches |
+
+**Example (JavaScript):**
+```javascript
+// Get all fixtures
+const allFixtures = await fetch('http://localhost:8000/api/football/fixtures', {
+  credentials: 'include',
+}).then(res => res.json());
+
+// Get home matches only
+const homeFixtures = await fetch('http://localhost:8000/api/football/fixtures?venue=home', {
+  credentials: 'include',
+}).then(res => res.json());
+
+// Get away matches with pagination
+const awayFixtures = await fetch('http://localhost:8000/api/football/fixtures?venue=away&per_page=5&page=1', {
+  credentials: 'include',
+}).then(res => res.json());
 ```
 
 ---

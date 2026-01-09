@@ -97,6 +97,22 @@ class Fixture extends Model
     }
 
     /**
+     * Scope to filter home matches (where team is home).
+     */
+    public function scopeHomeMatches($query)
+    {
+        return $query->where('home_team_id', static::getTeamId());
+    }
+
+    /**
+     * Scope to filter away matches (where team is away).
+     */
+    public function scopeAwayMatches($query)
+    {
+        return $query->where('away_team_id', static::getTeamId());
+    }
+
+    /**
      * Check if the configured team is home team.
      */
     public function isTeamHome(): bool
